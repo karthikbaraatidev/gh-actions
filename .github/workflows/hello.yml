@@ -1,0 +1,27 @@
+name: first github action
+
+# events, same as jenkins triggers
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  greet:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Say hello
+        run: echo "Hello, world!"
+
+      - name: show some info as well
+        run : | 
+          echo "This is a github action workflow triggered by ${{ github.event_name }}"
+          echo "running on branch ${{ github.ref }}"
+          echo "triggered by ${{ github.actor }}"
+

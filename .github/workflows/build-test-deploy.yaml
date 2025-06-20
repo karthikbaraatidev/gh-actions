@@ -1,0 +1,59 @@
+name: Build, Test, and Deploy
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  # Job 1: Build the application
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        
+    - name: Install dependencies
+      run: |
+        echo "npm install would run here"
+        echo "build-$(date +%s)" > build-artifact.txt
+        
+    - name: Build application
+      run: echo "npm run build would run here"
+      
+    - name: Upload build artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: build-files
+        path: build-artifact.txt
+
+  # Job 2: Run tests (depends on build)
+  test:
+    needs: build  # This is like Jenkins "wait for upstream"
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Download build artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: build-files
+        
+    - name: Run tests
+      run: |
+        echo "Tests would run here"
+        echo "Build file contains: $(cat build-artifact.txt)"
+
+  # Job 3: Deploy (only on main branch, after tests pass)
+  deploy:
+    needs: [build, test]  # Wait for BOTH jobs
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'  # Only deploy from main
+    steps:
+    - name: Deploy to staging
+      run: echo "Deploying to staging environment"

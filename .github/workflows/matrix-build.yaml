@@ -1,0 +1,51 @@
+name: Matrix Build Demo
+
+on: [push, pull_request]
+
+jobs:
+  test-matrix:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        # Test on 3 operating systems
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        # Test with 3 Node.js versions
+        node-version: [16, 18, 20]
+        # This creates 9 jobs total (3 × 3)
+        
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        
+    - name: Show environment info
+      run: |
+        echo "OS: ${{ matrix.os }}"
+        echo "Node version: ${{ matrix.node-version }}"
+        node --version
+        
+    - name: Run tests for this combination
+      run: echo "Running tests on ${{ matrix.os }} with Node ${{ matrix.node-version }}"
+
+  # Advanced matrix with includes/excludes
+  advanced-matrix:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        node-version: [16, 18]
+        include:
+          # Add macOS but only with Node 18
+          - os: macos-latest
+            node-version: 18
+        exclude:
+          # Skip Windows with Node 16 (maybe it's problematic)
+          - os: windows-latest
+            node-version: 16
+            
+    steps:
+    - name: Show what's running
+      run: echo "Testing ${{ matrix.os }} with Node ${{ matrix.node-version }}"
